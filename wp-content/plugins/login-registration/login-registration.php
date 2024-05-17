@@ -26,8 +26,8 @@
  */
 
 // If this file is called directly, abort.
-if ( ! defined( 'WPINC' ) ) {
-	die;
+if (!defined('WPINC')) {
+    die;
 }
 
 /**
@@ -35,34 +35,36 @@ if ( ! defined( 'WPINC' ) ) {
  * Start at version 1.0.0 and use SemVer - https://semver.org
  * Rename this for your plugin and update it as you release new versions.
  */
-define( 'LOGIN_REGISTRATION_VERSION', '1.0.0' );
+define('LOGIN_REGISTRATION_VERSION', '1.0.0');
 
 /**
  * The code that runs during plugin activation.
  * This action is documented in includes/class-login-registration-activator.php
  */
-function activate_login_registration() {
-	require_once plugin_dir_path( __FILE__ ) . 'includes/class-login-registration-activator.php';
-	Login_Registration_Activator::activate();
+function activate_login_registration()
+{
+    require_once plugin_dir_path(__FILE__) . 'includes/class-login-registration-activator.php';
+    Login_Registration_Activator::activate();
 }
 
 /**
  * The code that runs during plugin deactivation.
  * This action is documented in includes/class-login-registration-deactivator.php
  */
-function deactivate_login_registration() {
-	require_once plugin_dir_path( __FILE__ ) . 'includes/class-login-registration-deactivator.php';
-	Login_Registration_Deactivator::deactivate();
+function deactivate_login_registration()
+{
+    require_once plugin_dir_path(__FILE__) . 'includes/class-login-registration-deactivator.php';
+    Login_Registration_Deactivator::deactivate();
 }
 
-register_activation_hook( __FILE__, 'activate_login_registration' );
-register_deactivation_hook( __FILE__, 'deactivate_login_registration' );
+register_activation_hook(__FILE__, 'activate_login_registration');
+register_deactivation_hook(__FILE__, 'deactivate_login_registration');
 
 /**
  * The core plugin class that is used to define internationalization,
  * admin-specific hooks, and public-facing site hooks.
  */
-require plugin_dir_path( __FILE__ ) . 'includes/class-login-registration.php';
+require plugin_dir_path(__FILE__) . 'includes/class-login-registration.php';
 
 /**
  * Begins execution of the plugin.
@@ -73,21 +75,33 @@ require plugin_dir_path( __FILE__ ) . 'includes/class-login-registration.php';
  *
  * @since    1.0.0
  */
-function run_login_registration() {
+function run_login_registration()
+{
 
-	$plugin = new Login_Registration();
-	$plugin->run();
+    $plugin = new Login_Registration();
+    $plugin->run();
 
 }
-run_login_registration();
+run_login_registration(); ?>
 
+<?php // In your main plugin file or any other appropriate file
 
-add_action('admin_menu', 'my_custom_menu_setup');
+function enqueue_custom_plugin_style()
+{
 
-function my_custom_menu_setup() {
-    
+    wp_enqueue_style('custom-plugin-style', plugins_url('login-registration-admin.css', __FILE__), array(), '1.0', 'all');
+}
+
+add_action('admin_enqueue_scripts', 'enqueue_custom_plugin_style');
+?>
+
+<?php add_action('admin_menu', 'my_custom_menu_setup');
+
+function my_custom_menu_setup()
+{
+
     // Add a top-level menu item
-      add_menu_page(
+    add_menu_page(
         NULL, // Page title
         'Login-Registration', // Menu title (empty string)
         'manage_options', // Capability
@@ -117,12 +131,91 @@ function my_custom_menu_setup() {
     );
 }
 
-function my_custom_menu_page() {
-    echo '<h1>Custom Menu Page</h1>';
-    echo '<p>Welcome to the custom menu page.</p>';
+// function my_custom_menu_page() {
+//     echo '<h1>Custom Menu Page</h1>';
+//     echo '<p>Welcome to the custom menu page.</p>';
+// }
+function my_custom_menu_page()
+{
+    // Display the header and introduction
+    echo '<h1 style="text-align:center;">Custom Menu Page</h1>';
+    echo '<p style="text-align:center;">Welcome to the custom menu page.</p>';
+
+    // Check if the form is submitted to update user data
+    if (isset($_POST['action']) && $_POST['action'] === 'update') {
+        update_user_data($_POST);
+    }
+
+    // Display the list of all users
+    display_all_users();
 }
 
-function my_registration_submenu_page() {
+function display_all_users()
+{
+    global $wpdb;
+
+    // Fetch all users from the wp_users table
+    $users = $wpdb->get_results("SELECT ID, user_login, user_email FROM {$wpdb->users}");
+
+    if ($users) {
+        echo '<div style="text-align: center;">'; // Add a div with center alignment
+        echo '<h2>All Registered Users</h2>';
+        echo '<div style="display: inline-block; width: 80%; max-width: 800px; margin: 0 auto; padding: 20px; border: 1px solid #ccc; border-radius: 5px; background-color: #f9f9f9; margin-top: 30px;">'; // Add a div to center the table with specified styles
+        echo '<style>
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-top: 20px;
+            }
+            table, th, td {
+                border: 1px solid #ddd;
+            }
+            th, td {
+                padding: 8px;
+                text-align: left;
+            }
+            th {
+                background-color: #f2f2f2;
+            }
+            </style>';
+        echo '<table>';
+        echo '<tr><th>ID</th><th>Username</th><th>Email</th><th>First Name</th><th>Last Name</th></tr>';
+
+        // Loop through each user and display their information
+        foreach ($users as $user) {
+            $first_name = get_user_meta($user->ID, 'first_name', true);
+            $last_name = get_user_meta($user->ID, 'last_name', true);
+            $mobile_no = get_user_meta($user->ID, 'mobile_no', true); // Assuming 'mobile_no' is the correct meta key
+
+            // Debugging output to check if mobile_no is being fetched correctly
+            if (empty($mobile_no)) {
+                error_log('Mobile number not found for user ID: ' . $user->ID);
+            }
+
+            echo '<tr>';
+            echo '<td>' . esc_html($user->ID) . '</td>';
+            echo '<td>' . esc_html($user->user_login) . '</td>';
+            echo '<td>' . esc_html($user->user_email) . '</td>';
+            echo '<td>' . esc_html($first_name) . '</td>';
+            echo '<td>' . esc_html($last_name) . '</td>';
+            //echo '<td>' . esc_html($mobile_no) . '</td>';
+            echo '</tr>';
+        }
+
+        echo '</table>';
+        echo '</div>'; // Close the div for centering the table
+        echo '</div>'; // Close the div for center alignment
+    } else {
+        echo '<p>No users found.</p>';
+    }
+}
+
+
+
+
+
+function my_registration_submenu_page()
+{
     if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['register'])) {
         $errors = array();
 
@@ -153,18 +246,23 @@ function my_registration_submenu_page() {
         }
 
         if (empty($errors)) {
-            // Store user data
-            $user_data = array(
-                'first_name' => $first_name,
-                'last_name' => $last_name,
-                'mobile_no' => $mobile_no,
-                'email' => $email,
-                'password' => wp_hash_password($password)
+            // Create new user
+            $user_id = wp_insert_user(
+                array(
+                    'user_login' => $email, // Assuming email is used as username
+                    'user_email' => $email,
+                    'user_pass' => $password,
+                    'first_name' => $first_name,
+                    'last_name' => $last_name,
+                    'role' => 'subscriber' // Set the user role as needed
+                )
             );
 
-            // Optionally, you can store the user data in the database
-            update_option('custom_registration_user', $user_data);
-            echo '<p>Registration successful!</p>';
+            if (!is_wp_error($user_id)) {
+                echo '<p>Registration successful!</p>';
+            } else {
+                echo '<p style="color: red;">' . $user_id->get_error_message() . '</p>';
+            }
         } else {
             foreach ($errors as $error) {
                 echo '<p style="color: red;">' . $error . '</p>';
@@ -172,106 +270,48 @@ function my_registration_submenu_page() {
         }
     }
 
+    // Registration form
+    echo '<div class="registration-form">';
     echo '<h1>Registration Page</h1>';
     echo '<form method="POST">';
     echo '<p><label for="first_name">First Name: </label><input type="text" name="first_name" required></p>';
     echo '<p><label for="last_name">Last Name: </label><input type="text" name="last_name" required></p>';
     echo '<p><label for="mobile_no">Mobile No: </label><input type="text" name="mobile_no" required></p>';
-    echo '<p><label for="email">Email: </label><input type="email" name="email" required></p>';
-    echo '<p><label for="password">Password: </label><input type="password" name="password" required></p>';
+    echo '<p><label for="email">Email: </label><input type="email" name="email" ></p>';
+    echo '<p><label for="password">Password: </label><input type="password" name="password"></p>';
     echo '<p><input type="submit" name="register" value="Register"></p>';
     echo '</form>';
+    echo '</div>';
 }
 
-function my_login_submenu_page() {
+function my_login_submenu_page()
+{
     if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['login'])) {
         $email = sanitize_email($_POST['email']);
         $password = sanitize_text_field($_POST['password']);
 
-        $user_data = get_option('custom_registration_user');
+        $user = get_user_by('email', $email);
 
-        if ($user_data && $user_data['email'] === $email && wp_check_password($password, $user_data['password'])) {
-            // If login is successful, display user data and edit button
-            display_user_data($user_data);
-            echo '<form method="POST">';
-            echo '<input type="hidden" name="email" value="' . esc_attr($user_data['email']) . '">';
-            echo '<input type="hidden" name="action" value="edit">';
-            echo '<input type="submit" name="edit" value="Edit">';
-            echo '</form>';
+        if ($user && wp_check_password($password, $user->data->user_pass)) {
+            echo '<p style="color: green;">Login successfully.</p>';
         } else {
-            echo '<p style="color: red;">Invalid email or password.</p>';
+            echo '<p style="color: red;">Email or password is incorrect.</p>';
         }
-    } elseif ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['action'] == 'edit') {
-        // If edit action is triggered, display registration form with pre-filled data
-        display_registration_form($_POST['email']);
-    } elseif ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['action'] == 'update') {
-        // If update action is triggered, update user data and display updated information
-        update_user_data($_POST);
     } else {
-        // Display login form
+        // Login form
+        echo '<div class="login-form-wrapper">';
         echo '<h1>Login Page</h1>';
         echo '<form method="POST">';
-        echo '<p><label for="email">Email: </label><input type="email" name="email" required></p>';
-        echo '<p><label for="password">Password: </label><input type="password" name="password" required></p>';
-        echo '<p><input type="submit" name="login" value="Login"></p>';
+        echo '<p><label for="email">Email: </label><input type="email" name="email" ></p>';
+        echo '<p><label for="password">Password: </label><input type="password" name="password"></p>';
+        echo '<p><input type="submit" name="login" value="Login" class="login-button"></p>';
         echo '</form>';
+        echo '</div>';
     }
 }
 
-function display_user_data($user_data) {
-    echo '<p>Login successful!</p>';
-    echo '<h2>User Information</h2>';
-    echo '<style>
-            table {
-                width: 100%;
-                border-collapse: collapse;
-                margin-top: 20px;
-            }
-            table, th, td {
-                border: 1px solid #ddd;
-            }
-            th, td {
-                padding: 8px;
-                text-align: left;
-            }
-            th {
-                background-color: #f2f2f2;
-            }
-          </style>';
-    echo '<table>';
-    echo '<tr><th>First Name</th><td>' . esc_html($user_data['first_name']) . '</td></tr>';
-    echo '<tr><th>Last Name</th><td>' . esc_html($user_data['last_name']) . '</td></tr>';
-    echo '<tr><th>Mobile No</th><td>' . esc_html($user_data['mobile_no']) . '</td></tr>';
-    echo '<tr><th>Email</th><td>' . esc_html($user_data['email']) . '</td></tr>';
-    echo '</table>';
-}
 
-function display_registration_form($email) {
-    $user_data = get_option('custom_registration_user');
-    echo '<h1>Edit User Information</h1>';
-    echo '<form method="POST">';
-    echo '<input type="hidden" name="email" value="' . esc_attr($email) . '">';
-    echo '<p><label for="first_name">First Name: </label><input type="text" name="first_name" value="' . esc_attr($user_data['first_name']) . '" required></p>';
-    echo '<p><label for="last_name">Last Name: </label><input type="text" name="last_name" value="' . esc_attr($user_data['last_name']) . '" required></p>';
-    echo '<p><label for="mobile_no">Mobile No: </label><input type="text" name="mobile_no" value="' . esc_attr($user_data['mobile_no']) . '" required></p>';
-    echo '<p><input type="submit" name="action" value="update"></p>';
-    echo '</form>';
-}
 
-function update_user_data($data) {
-    $email = sanitize_email($data['email']);
-    $first_name = sanitize_text_field($data['first_name']);
-    $last_name = sanitize_text_field($data['last_name']);
-    $mobile_no = sanitize_text_field($data['mobile_no']);
 
-    $user_data = array(
-        'email' => $email,
-        'first_name' => $first_name,
-        'last_name' => $last_name,
-        'mobile_no' => $mobile_no
-    );
 
-    update_option('custom_registration_user', $user_data);
-    echo '<p>User information updated successfully!</p>';
-    display_user_data($user_data);
-}
+

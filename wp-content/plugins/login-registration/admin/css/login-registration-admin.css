@@ -2,3 +2,96 @@
  * All of the CSS for your admin-specific functionality should be
  * included in this file.
  */
+ .registration-form {
+    max-width: 400px;
+    margin: 0 auto;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+    margin-top :30px;
+}
+
+.registration-form h1 {
+    text-align: center;
+}
+
+.registration-form form p {
+    margin: 10px 0;
+}
+
+.registration-form label {
+    display: inline-block;
+    width: 120px;
+    font-weight: bold;
+}
+
+.registration-form input[type="text"],
+.registration-form input[type="email"],
+.registration-form input[type="password"] {
+    width: calc(100% - 130px);
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+}
+
+.registration-form input[type="submit"] {
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    background-color: #007bff;
+    color: #fff;
+    cursor: pointer;
+}
+
+.registration-form input[type="submit"]:hover {
+    background-color: #0056b3;
+}
+.login-form-wrapper {
+        max-width: 400px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #f9f9f9;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        margin-top:30px;
+    }
+
+    .login-form-wrapper h1 {
+        text-align: center;
+    }
+
+    .login-form-wrapper form {
+        margin-top: 20px;
+    }
+
+    .login-form-wrapper p {
+        margin-bottom: 10px;
+    }
+
+    .login-form-wrapper label {
+        display: block;
+        font-weight: bold;
+    }
+
+    .login-form-wrapper input[type="email"],
+    .login-form-wrapper input[type="password"],
+    .login-form-wrapper input[type="submit"] {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        box-sizing: border-box;
+    }
+
+    .login-form-wrapper input[type="submit"] {
+        background-color:#007bff ;
+        color: white;
+        cursor: pointer;
+    }
+
+    /* .login-form-wrapper input[type="submit"]:hover {
+        background-color: #45a049;
+    } */
